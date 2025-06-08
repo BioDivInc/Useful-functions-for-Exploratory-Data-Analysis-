@@ -1,6 +1,8 @@
 # Useful-functions-for-Exploratory-Data-Analysis-
 
 I've come up with some, hopefully, usefull functions to simplify EDA of a loaded dataset. I'd recommend using a '.ipynb' file for it to work properly and display tables nicely.
+
+## 1. Print out basic information about the loaded dataset
 The first function prints basic information about the dataset (e.g., dimensions, dtypes, checks for NAs, ...) to skip the very first step of just getting a feeling for the dataset and checking the basics. The function includes, instead of basics tables, a prettier output using `tabulate` with `tablefmt='rounded_grid'`.
 
 ```python
@@ -70,6 +72,7 @@ def print_bascis(dataset):
     print("\nSummary of numerical features:")
     display(dataset.describe().T.style.format("{:.2f}").background_gradient(cmap='Blues')) # description of numerical features with transposed rows, backed with a blue gradient
 ```
+## 2. Visual exploration of categorical features
 The second function covers the visual exploration of categorical features/columns. For this kind of EDA, the most common type of plot is the histogram, so I stuck with that for now. You can freely choose the number of columns (grid size) and the batch size of the output plots. Moreover, you can either choose a categorical feature as `key` or just type in `None` for a more general overview of the dataset, instead of a classification.
 ```python
 def EDA_categorical(dataset, ncols:int, batch_size:int, dpi:int, key:str):
@@ -134,6 +137,7 @@ def EDA_categorical(dataset, ncols:int, batch_size:int, dpi:int, key:str):
         plt.tight_layout()
         plt.show()
 ```
+## 3. Visual exploration of numerical features
 The third function allows you to explore the numerical features/column in the loaded dataset. It is similarly structured as above, but additionally includes the possibility to output different types of plots. I've added the most popular ones: histogram, boxplot, barplot and violinplot which can be controlled via `type`.
 ```python
 def EDA_numerical(dataset, ncols:int, batch_size:int, dpi:int, key:str, type:str):
@@ -237,6 +241,7 @@ def EDA_numerical(dataset, ncols:int, batch_size:int, dpi:int, key:str, type:str
         plt.tight_layout()
         plt.show()
 ```
+## 4. Summary of statistical tests to find a fitting correlation coefficient 
 Especially with high-dimensional datasets, we'd like to know how features correlate with each other. However, for a proper statistical evaluation, conditions must be met. 
 The fourth function focusus on the output of useful information about the dataset (e.g., length, duplicate count, shapiro-wilk test statistics, AUC, ...) to check for normality and offer insights to decide which correlation coefficient (i.e., pearson, spearman, kendall) to apply. For that purpose, visual evaluations can help to support the decision whether or not the data follows a normal distribution. 
 Next to density histograms and pp-plots, the function also includes a suggestion method for a good fitting coefficient, based on hard-coded conditions, which can be, of course, changed. The suggested classification gets pickled and can later on be used to process these informations.
@@ -539,8 +544,10 @@ def correlation_summary(dataset, ncols:int, batch_size_per_feature:int, dpi:int,
             print("\nSuggested correlation coefficient: kendall's τ.")
             print(tabulate(kendall_df.values.tolist(),headers=['Feature: name'], tablefmt='rounded_grid'))
 ```
+## 5. Processing statistical information and visualize relationships
 The last function processes the information collected in `correlation_summary` and outputs a correlation matrix, either using the correlation coefficient of your choice or, by entering `corr='auto'`, the suggested classification. When using the `auto` function and a `key`, make sure to use the same `key` as used before in `correlation_summary` for the correct data being used.
 ```python
+def correlation_visualization(dataset, corr:str, dpi:int, key:str): 
     """
     Visualizes the relationship (i.e., correlation) of numercial features in a loaded dataset,\n
     dataset = any dataframe, \n
@@ -720,5 +727,5 @@ The last function processes the information collected in `correlation_summary` a
             for class_name, df in keys_df.items():
 
                 # prepare datasets and plot correlation matrix 
-                prepare_and_plot(data=dataset, coefficient=corr)
+                prepare_and_plot(data=dataset, coefficient=corr) 
 ```
