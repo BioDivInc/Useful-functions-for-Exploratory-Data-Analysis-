@@ -393,12 +393,11 @@ def correlation_summary(dataset, ncols:int, batch_size_per_feature:int, dpi:int,
             score=0
 
             # define conditions for suggested categorization of correlation coefficients
-            #condition_tests = row['p-value shapiro'] > 0.05 and row['p-value normal'] > 0.05 # if greater than 0.05, considered normally distributed
-            condition_auc = row['auc diff'] <= 3.5  # set an MSD of 0.1 as threshold for now
-            condition_msd = row['msd'] <= 0.5
+            condition_auc = row['auc diff'] <= 3.5  # if smaller or equal to 3.5, high possibility of being normal distributed
+            condition_msd = row['msd'] <= 0.5 # if smaller or equal to 0.5, high possibility of being normal distributed
             condition_n = row['feature: n'] > 30 # if length of feature is greater than 30
             condition_ties = row['duplicates %'] < 20 # if less than 20 % of duplicates/tied ranks
-            condition_skew_kurtosis = row['statistic normal'] < 55 # if kurtosis, skew score is smaller than 50
+            condition_skew_kurtosis = row['statistic normal'] < 55 # if kurtosis+skew score is smaller than 55
 
             # add a weight to condtions
             if condition_msd:
@@ -407,8 +406,6 @@ def correlation_summary(dataset, ncols:int, batch_size_per_feature:int, dpi:int,
                 score += 2
             if condition_skew_kurtosis:
                 score += 1
-            #if condition_tests:
-                #score += 0.5 
             if condition_n:
                 score += 0.25
             if condition_ties:
