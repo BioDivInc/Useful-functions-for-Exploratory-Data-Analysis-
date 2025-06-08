@@ -1,6 +1,6 @@
 # Useful-functions-for-Exploratory-Data-Analysis-
 
-I've come up with some, hopefully, usefull functions to simplify EDA of a loaded dataset. I'd recommend using a '.ipynb' file for it to work properly and display tables nicely.
+I've come up with some, hopefully, usefull functions to simplify EDA of a loaded dataset. I'd recommend using an '.ipynb' file for it to work properly and display tables nicely.
 
 ## 1. Print out basic information about the loaded dataset
 The first function prints basic information about the dataset (e.g., dimensions, dtypes, checks for NAs, ...) to skip the very first step of just getting a feeling for the dataset and checking the basics. The function includes, instead of basics tables, a prettier output using `tabulate` with `tablefmt='rounded_grid'`.
