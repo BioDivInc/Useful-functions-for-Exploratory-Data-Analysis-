@@ -295,7 +295,7 @@ def correlation_summary(dataset, ncols:int, batch_size_per_feature:int, dpi:int,
         %pip install numpy
         import numpy as np
         from numpy import trapezoid
-        ("Installed, imported numpy and trapezoid.")
+        print("Installed, imported numpy and trapezoid.")
         %pip install pylab
         import pylab
         print("Installed and imported pylab.")
