@@ -1,4 +1,4 @@
-# Useful-functions-for-Exploratory-Data-Analysis-
+# Useful functions for Exploratory Data Analysis
 
 I've come up with some, hopefully, usefull functions to simplify EDA of a loaded dataset. I'd recommend using an '.ipynb' file for it to work properly and display tables nicely.
 
