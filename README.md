@@ -243,7 +243,7 @@ def EDA_numerical(dataset, ncols:int, batch_size:int, dpi:int, key:str, type:str
 ```
 ## 4. Summary of statistical tests to find a fitting correlation coefficient 
 Especially with high-dimensional datasets, we'd like to know how features correlate with each other. However, for a proper statistical evaluation, conditions must be met. 
-The fourth function focusus on the output of useful information about the dataset (e.g., length, duplicate count, shapiro-wilk test statistics, AUC, ...) to check for normality and offer insights to decide which correlation coefficient (i.e., pearson, spearman, kendall) to apply. For that purpose, visual evaluations can help to support the decision whether or not the data follows a normal distribution. 
+The fourth function focuses on the output of useful information about the dataset (e.g., length, duplicate count, shapiro-wilk test statistics, AUC, ...) to check for normality and offer insights to decide which correlation coefficient (i.e., pearson, spearman, kendall) to apply. For that purpose, visual evaluations can help to support the decision whether or not the data follows a normal distribution. 
 Next to density histograms and pp-plots, the function also includes a suggestion method for a good fitting coefficient, based on hard-coded conditions, which can be, of course, changed. The suggested classification gets pickled and can later on be used to process these informations.
 ```python
 def correlation_summary(dataset, ncols:int, batch_size_per_feature:int, dpi:int, key:str):
@@ -546,7 +546,7 @@ The last function processes the information collected in `correlation_summary` a
 ```python
 def correlation_visualization(dataset, corr:str, dpi:int, key:str): 
     """
-    Visualizes the relationship (i.e., correlation) of numercial features in a loaded dataset,\n
+    Visualizes the relationship (i.e., correlation) of numercial features in a loaded dataset.\n
     dataset = any dataframe, \n
     corr = correlation coefficient (i.e., 'pearson', 'spearman', 'kendall'); 'auto' = takes suggested classification by the function 'correlation_summary', \n
     dpi = dots per inch resolution for plotting, \n
@@ -560,6 +560,9 @@ def correlation_visualization(dataset, corr:str, dpi:int, key:str):
         import matplotlib.pyplot as plt
         print("Imported matplotlib.")
         from tabulate import tabulate
+        print("Imported tabulate.")
+        from pathlib import Path
+        print("Imported Path.")
     except:
         %pip install seaborn
         import seaborn as sns
@@ -567,6 +570,12 @@ def correlation_visualization(dataset, corr:str, dpi:int, key:str):
         %pip install matplotlib
         import matplotlib.pyplot as plt
         print("Installed and imported matplotlib.")
+        %pip install tabulate
+        from tabulate import tabulate
+        print("Installed and imported tabulate.")
+        %pip install pathlib
+        from pathlib import Path
+        print("Installed and imported pathlib.")
 
     # set some visualization parameters
     sns.set_theme(style="whitegrid") # appearance
@@ -588,7 +597,7 @@ def correlation_visualization(dataset, corr:str, dpi:int, key:str):
     def prepare_and_plot(data, coefficient:str):
 
         # call function 'determine_suffix' to create the full name of the used correlation coefficient
-        corr_full_name = determine_suffix(df_name if corr == 'auto' else corr)
+        corr_full_name = determine_suffix(path.stem if corr == 'auto' else corr)
 
         # select only numerical columns
         numeric_df = data.select_dtypes(include=['int', 'float'])
@@ -623,36 +632,47 @@ def correlation_visualization(dataset, corr:str, dpi:int, key:str):
 
         # if no correlation coefficient is entered, but auto categorization is desired
         if corr == 'auto':
+            
+            # file names of pickled data
+            filenames = ['pearson.pkl', 'spearman.pkl', 'kendall.pkl']
+            # create empty list for actually existing files
+            existing_files = []
 
-            # correlation coefficients
-            dfs_list = ['pearson', 'spearman', 'kendall']
+            # 1. Check which files exist
+            for file_name in filenames:
+                path = Path(file_name)
+                if path.is_file():
+                    existing_files.append(path) # update list if existent
+                else: # print non-existent file names
+                    print(f"\n{file_name} not existent. Loading existent ones...", end="")
 
-            # create empty dict for the data to be saved into
+            # Dictionary to hold loaded dataframes
             dfs_dict = {}
 
-            # 1. loop through list of correlation coefficients and load specific .pkl data 
-            for df_name in dfs_list:
-
+            # 2. Load existing .pkl files
+            for path in existing_files:
                 try:
-                    # loads pickled dataframes with suggested correlation coefficient for features in dataset
-                    df_features = dfs_dict[df_name] = pd.read_pickle(f'{df_name}.pkl')
-                    print(f"\nLoaded {df_name}.pkl:")
-                    print(tabulate(df_features, tablefmt='rounded_grid'))
+                    # load pickled files 
+                    df = pd.read_pickle(path)
+                    # create df with correlation coefficient names and get rid of the suffix
+                    dfs_dict[path.stem] = df 
+                    print(f"\nLoaded {path.name}:")
+                    print(tabulate(df, tablefmt='rounded_grid'))
 
-                    # gets values (feature names) from dict
-                    values = df_features['feature']
+                    # Extract values
+                    values = df['feature'].tolist()
 
                 except Exception as e:
-                    print(f"\nCould not load {df_name}.pkl: {e}")
+                    print(f"Error loading {path.name}: {e}")
                 
-                # create subsets
+                # 3. create subsets
                 try:
                     subset = dataset[values]
                 except KeyError as e:
-                    print(f"{df_name} not found in dataset: {e}")
+                    print(f"{path.stem} not found in dataset: {e}")
 
-                # prepare dataset and plot correlation matrix
-                prepare_and_plot(data=subset, coefficient=df_name)
+                # 4. prepare dataset and plot correlation matrix
+                prepare_and_plot(data=subset, coefficient=path.stem)
 
         # if correlation coefficient ('pearson', 'spearman', 'kendall') is provided
         else:
@@ -667,62 +687,72 @@ def correlation_visualization(dataset, corr:str, dpi:int, key:str):
         # if auto categorization of correlation coefficients:
         if corr == 'auto':
 
-            # correlation coefficients
-            dfs_list = ['pearson', 'spearman', 'kendall']
+            # file names of pickled data
+            filenames = ['pearson.pkl', 'spearman.pkl', 'kendall.pkl']
+            # create empty list for actually existing files
+            existing_files = []
 
-            # create empty dict for the data to be saved into
+             # 1. Check which files exist
+            for file_name in filenames:
+                path = Path(file_name)
+                if path.is_file():
+                    existing_files.append(path) # update list if existent
+                else: # print non-existent file names
+                    print(f"\n{file_name} not existent. Loading existent ones...", end="")
+
+            # Dictionary to hold loaded DataFrames
             dfs_dict = {}
 
-            # 1. loop through list and load specific .pkl data 
-            for df_name in dfs_list:
-
+            # 2. Load existing .pkl files
+            for path in existing_files:
                 try:
-                    # loads pickled dataframes with suggested correlation coefficient for features in dataset
-                    df_features = dfs_dict[df_name] = pd.read_pickle(f'{df_name}.pkl')
-                    print(f"\nLoaded {df_name}.pkl:")
-                    print(tabulate(df_features, tablefmt='rounded_grid'))
+                    # load pickled files 
+                    df = pd.read_pickle(path)
+                    # create df with correlation coefficient names and get rid of the suffix
+                    dfs_dict[path.stem] = df 
+                    print(f"\nLoaded {path.name}:")
+                    print(tabulate(df, tablefmt='rounded_grid'))
 
-                    # gets values (feature names) from dict
-                    values = df_features['feature']
+                    # Extract 'feature' column (if needed)
+                    values = df['feature'].tolist()
 
                 except Exception as e:
-                    dfs_dict[df_name] = None
-                    print(f"\nCould not load {df_name}.pkl: {e}")
+                    print(f"Error loading {path.name}: {e}")
+
                 
-                # Subset the dataset by each class in the key
+                # 3. Subset the dataset by each class in the key
                 try:
                     class_names = dataset[key].unique().tolist()
                 except KeyError as e:
                     print(f"'{key}' not found in dataset: {e}")
                 
-                # 2. loop through subset
+                # 4. loop through subset and plot correlation matrix
                 for class_name in class_names:
                     subset_df = dataset[dataset[key] == class_name]
                     selected_columns = subset_df[values]
-
                     try:
-                        prepare_and_plot(data=selected_columns, coefficient=df_name)
+                        prepare_and_plot(data=selected_columns, coefficient=path.stem)
                     except Exception as e:
                         print(f"Error processing '{class_name}' for correlation coefficient '{corr}': {e}")
 
         # if correlation coefficent is provided
         else:
 
-            # get unique key names
+            # 1. get unique key names
             class_names = dataset[key].unique().tolist()
             class_names
 
             # create empty dict for the dfs to be saved into
             keys_df={}
 
-            # create subset for each unique class name
+            # 2. create subset for each unique class name
             for class_name in class_names:
                 df = dataset[dataset[key] == class_name]
                 keys_df[class_name] = df
             
-            # for the class name and associated data, get items and create correlation plot
+            # 3. for the class name and associated data, get items and create correlation plot
             for class_name, df in keys_df.items():
 
-                # prepare datasets and plot correlation matrix 
-                prepare_and_plot(data=dataset, coefficient=corr) 
+                # 3. prepare datasets and plot correlation matrix 
+                prepare_and_plot(data=dataset, coefficient=corr)
 ```
